@@ -1,0 +1,5 @@
+spring:
+  config:
+    # `application-prod.yml`이 활성화되려면 `prod` 프로필이어야 합니다.
+    activate:
+      on-profile: prod
