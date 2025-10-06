@@ -1,5 +1,0 @@
-# 사용자 default 비활성화
-user default off
-
-# 모든 키와 모든 명령어에 접근할 수 있는 별도 사용자 생성
-user ${REDIS_ID} on >${REDIS_PASSWORD} ~* +@all
