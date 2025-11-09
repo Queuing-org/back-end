@@ -1,0 +1,60 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+    types: [ opened, synchronize, reopened, ready_for_review ]
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  build:
+    if: ${{ github.event_name == 'push' || (!github.event.pull_request.draft || github.event.action == 'ready_for_review') }}
+    runs-on: ubuntu-latest
+    steps:
+      # 현재 저장소의 소스 코드와 서브 모듈 내려 받기
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: true
+          # 개인 사용자 토큰의 소유자가 변경되면 이 설정 파일을 다시 커밋하여
+          # GitHub Actions 최초 실행 사용자를 변경해야 합니다.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # JDK 21 (Eclipse Temurin) 환경 구성
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # Gradle 내려 받기 및 캐싱
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      # Gradlew 실행 권한 부여
+      - name: Add +x permission to gradlew
+        run: chmod +x gradlew
+
+      # 빌드 진행
+      - name: Build with Gradle
+        run: ./gradlew clean build
+
+      # 테스트 결과 출력
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v6
+        if: success() || failure() # always run even if the previous step fails
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'
