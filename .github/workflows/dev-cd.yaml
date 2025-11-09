@@ -74,7 +74,7 @@ jobs:
 
       # 이미지 내려 받기
       - name: Pull latest image
-        run: nerdctl pull ${{ needs.build.outputs.image-tag }}
+        run: sudo -n nerdctl pull ${{ needs.build.outputs.image-tag }}
 
       # 실행 중인 컨테이너 정리 및 기존 이미지 삭제
       - name: Clean up old container and image
@@ -83,7 +83,7 @@ jobs:
           sudo -n nerdctl images "ghcr.io/${{ github.repository }}" \
           --format "{{.Repository}}:{{.Tag}}" \
           | grep -v "${{ needs.build.outputs.image-tag }}" \
-          | xargs -r nerdctl rmi -f || true
+          | xargs -r sudo -n nerdctl rmi -f || true
 
       # 새로운 이미지로 새로운 컨테이너 생성하여 실행
       - name: Run New Container
