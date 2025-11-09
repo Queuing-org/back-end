@@ -5,10 +5,9 @@ WORKDIR /app
 COPY gradlew .
 COPY gradle/ ./gradle/
 COPY settings.gradle build.gradle ./
-RUN chmod +x gradlew
-RUN ./gradlew dependencies --no-daemon
 
 COPY . .
+RUN chmod +x gradlew
 RUN ./gradlew bootJar -x test --build-cache --no-daemon
 
 # Run Stage
@@ -19,11 +18,11 @@ ARG JAR_FILE_PATH=app/build/libs/*.jar
 ENV TZ=Asia/Seoul \
     USE_PROFILE=dev
 
-RUN useradd -m -u 10001 woker
+RUN useradd -m -u 10001 queuing
 
-COPY --from=build --chown=worker:worker ${JAR_FILE_PATH} app.jar
+COPY --from=build --chown=queuing:queuing ${JAR_FILE_PATH} app.jar
 
-USER worker:worker
+USER queuing:queuing
 
 EXPOSE 8080
 ENTRYPOINT ["java", "-Dspring.profiles.active=${USE_PROFILE}", "-jar", "app.jar"]
