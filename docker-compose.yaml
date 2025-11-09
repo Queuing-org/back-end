@@ -1,0 +1,40 @@
+services:
+  mariadb:
+    image: mariadb:lts
+    ports:
+      - "33063:3306"
+    container_name: mariadb
+    environment:
+      TZ: Asia/Seoul
+      MARIADB_USER: ${DATASOURCE_ID}
+      MARIADB_PASSWORD: ${DATASOURCE_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DATASOURCE_PASSWORD}
+      MARIADB_DATABASE: local
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-name-resolve=ON
+      - --innodb-file-per-table=1
+    volumes:
+      - ./container/mariadb/conf.d/server.conf:/etc/mysql/conf.d/server.conf:ro
+      - ./container/mariadb/conf.d/client.conf:/etc/mysql/conf.d/client.conf:ro
+      - mariadb_data:/var/lib/mysql
+      - ./container/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+
+  redis:
+    image: redis:8-alpine
+    container_name: redis
+    ports:
+      - "63793:6379"
+    environment:
+      TZ: Asia/Seoul
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+    volumes:
+      - ./container/redis/conf.d/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - redis_data:/data
+
+volumes:
+  mariadb_data:
+  redis_data:

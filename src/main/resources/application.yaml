@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: queuing-core
+  profiles:
+    group:
+      prod: prod
+      dev: dev
+      local: local
+
+---
+
+spring:
+  profiles:
+    active: local

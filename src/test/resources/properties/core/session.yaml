@@ -1,0 +1,16 @@
+core:
+  session:
+    session-cookie:
+      name: "JSESSIONID"
+      domain: "localhost"
+      max-age: -1
+      http-only: true
+      secure: false
+      same-site: "LAX"
+    remember-me-cookie:
+      name: "remember-me"
+      key: "REMEMBER-ME-COOKIE-KEY"
+      domain: "localhost"
+      max-age: 600
+      secure: false
+      always-remember-me: true
