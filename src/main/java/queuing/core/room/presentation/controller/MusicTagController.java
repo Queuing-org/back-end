@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+import queuing.core.global.response.ResponseBody;
 import queuing.core.room.application.usecase.GetListMusicTagUseCase;
 import queuing.core.room.presentation.response.ListMusicTagResponse;
 import queuing.core.room.presentation.response.MusicTagResponse;
@@ -20,13 +21,13 @@ public class MusicTagController {
     private final GetListMusicTagUseCase getListMusicTagUseCase;
 
     @GetMapping
-    public ResponseEntity<ListMusicTagResponse> getList() {
+    public ResponseEntity<ResponseBody<ListMusicTagResponse>> getList() {
         List<MusicTagResponse> items = getListMusicTagUseCase.getList().stream()
             .map(MusicTagResponse::from)
             .toList();
 
         ListMusicTagResponse content = new ListMusicTagResponse(items);
 
-        return ResponseEntity.ok().body(content);
+        return ResponseEntity.ok().body(ResponseBody.success(content));
     }
 }

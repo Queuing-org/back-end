@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+import queuing.core.global.response.ResponseBody;
 import queuing.core.room.application.model.CreateRoomCommand;
 import queuing.core.room.application.model.GetListRoomCommand;
 import queuing.core.room.application.model.GetListRoomResult;
@@ -39,7 +40,7 @@ public class RoomController {
     }
 
     @GetMapping
-    public ResponseEntity<ListRoomResponse> getList(
+    public ResponseEntity<ResponseBody<ListRoomResponse>> getList(
         @RequestParam(required = false) Long lastId,
         @RequestParam(defaultValue = "30") int size
     ) {
@@ -59,6 +60,6 @@ public class RoomController {
             )).toList();
 
         return ResponseEntity.ok()
-            .body(new ListRoomResponse(getListRoomResult.hasNext(), getListRoomResult.nextId(), items));
+            .body(ResponseBody.success(new ListRoomResponse(items, getListRoomResult.hasNext())));
     }
 }
