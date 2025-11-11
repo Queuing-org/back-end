@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import queuing.core.room.application.model.GetListRoomCommand;
+import queuing.core.room.application.model.GetListRoomQuery;
 import queuing.core.room.application.model.GetListRoomResult;
 import queuing.core.room.application.model.MusicTagItem;
 import queuing.core.room.application.model.RoomItem;
@@ -23,10 +23,15 @@ public class RoomReadService implements GetListRoomUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public GetListRoomResult getList(GetListRoomCommand cmd) {
+    public GetListRoomResult getList(GetListRoomQuery cmd) {
         cmd.validate();
 
-        CursorResult<RoomWithTagsView> result = roomRepository.findAllWithTags(cmd.lastId(), cmd.size());
+        CursorResult<RoomWithTagsView> result = roomRepository.findAll(
+            cmd.tags(),
+            cmd.matchType().name(),
+            cmd.roomId(),
+            cmd.size()
+        );
 
         List<RoomItem> items = result.items().stream()
             .map(view -> new RoomItem(
