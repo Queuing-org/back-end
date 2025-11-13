@@ -33,6 +33,7 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
     @Override
     public CursorResult<RoomWithTagsView> findAll(List<String> tags, String matchType, Long cursorRoomId, int limit) {
         // ID 목록 조회
+        tags = (tags != null) ? tags : List.of();
         boolean isAllMatch = matchType != null && "ALL".equalsIgnoreCase(matchType.strip());
         List<Long> roomIdList = fetchRoomIds(tags, isAllMatch, cursorRoomId, limit);
 
@@ -42,10 +43,10 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
         }
 
         boolean hasNext = roomIdList.size() > limit;
-        // 현재 조회에서 찾을 엔티티 ID
+        // 현재 조회에서 찾을 엔티티 ID / 반열린구간 [0, limit)
         List<Long> pageIds = hasNext ? roomIdList.subList(0, limit) : roomIdList;
-        // 다음 조회에서 찾을 엔티티 ID
-        Long nextCursorId = hasNext ? pageIds.getLast() : null;
+        // 다음 조회에서 찾을 엔티티 ID / {0, ..., limit - 1 | limit}
+        Long nextCursorId = hasNext ? pageIds.get(limit) : null;
 
         // 방 엔티티 조회
         Map<Long, Room> roomsById = fetchRooms(pageIds);

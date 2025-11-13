@@ -6,7 +6,7 @@ public enum TagMatchType {
 
     public static TagMatchType from(String value) {
         if (value == null || value.isBlank()) {
-            return ALL;
+            return ANY;
         }
 
         try {

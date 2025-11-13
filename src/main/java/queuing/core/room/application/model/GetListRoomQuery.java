@@ -18,6 +18,9 @@ public record GetListRoomQuery(
             .distinct()
             .toList()
             : List.of();
+        matchType = (matchType != null)
+            ? matchType
+            : TagMatchType.ANY;
     }
 
     public void validate() {
@@ -27,6 +30,10 @@ public record GetListRoomQuery(
 
         if (size < 0) {
             throw new IllegalArgumentException("한 번에 가져올 양은 0 이상의 정수여야 합니다.");
+        }
+
+        if (size > 100) {
+            throw new IllegalArgumentException("한 번에 가져올 양은 100 이하의 정수여야 합니다.");
         }
     }
 }
