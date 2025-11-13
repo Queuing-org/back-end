@@ -101,71 +101,71 @@ reviews:
     drafts: false
     base_branches: [ ]
 
-tools:
-  shellcheck:
-    enabled: true
-  ruff:
-    enabled: false
-  markdownlint:
-    enabled: true
-  github-checks:
-    enabled: true
-    timeout_ms: 90000
-  languagetool:
-    enabled: true
-    enabled_only: false
-    level: default
-    enabled_rules: [ ]
-    disabled_rules:
-      - EN_UNPAIRED_BRACKETS
-      - EN_UNPAIRED_QUOTES
-    enabled_categories: [ ]
-    disabled_categories:
-      - TYPOS
-      - TYPOGRAPHY
-      - CASING
-  biome:
-    enabled: true
-  hadolint:
-    enabled: false
-  swiftlint:
-    enabled: false
-  phpstan:
-    enabled: false
-    level: default
-  golangci-lint:
-    enabled: false
-  yamllint:
-    enabled: true
-  gitleaks:
-    enabled: true
-  checkov:
-    enabled: false
-  detekt:
-    enabled: false
-  eslint:
-    enabled: true
-  rubocop:
-    enabled: false
-  buf:
-    enabled: false
-  regal:
-    enabled: false
-  actionlint:
-    enabled: true
-  pmd:
-    enabled: true
-  cppcheck:
-    enabled: false
-  semgrep:
-    enabled: true
-  circleci:
-    enabled: true
-  ast-grep:
-    packages: [ ]
-    rule_dirs: [ ]
-    util_dirs: [ ]
-    essential_rules: true
+  tools:
+    shellcheck:
+      enabled: true
+    ruff:
+      enabled: false
+    markdownlint:
+      enabled: true
+    github-checks:
+      enabled: true
+      timeout_ms: 90000
+    languagetool:
+      enabled: true
+      enabled_only: false
+      level: default
+      enabled_rules: [ ]
+      disabled_rules:
+        - EN_UNPAIRED_BRACKETS
+        - EN_UNPAIRED_QUOTES
+      enabled_categories: [ ]
+      disabled_categories:
+        - TYPOS
+        - TYPOGRAPHY
+        - CASING
+    biome:
+      enabled: true
+    hadolint:
+      enabled: false
+    swiftlint:
+      enabled: false
+    phpstan:
+      enabled: false
+      level: default
+    golangci-lint:
+      enabled: false
+    yamllint:
+      enabled: true
+    gitleaks:
+      enabled: true
+    checkov:
+      enabled: false
+    detekt:
+      enabled: false
+    eslint:
+      enabled: true
+    rubocop:
+      enabled: false
+    buf:
+      enabled: false
+    regal:
+      enabled: false
+    actionlint:
+      enabled: true
+    pmd:
+      enabled: true
+    cppcheck:
+      enabled: false
+    semgrep:
+      enabled: true
+    circleci:
+      enabled: true
+    ast-grep:
+      packages: [ ]
+      rule_dirs: [ ]
+      util_dirs: [ ]
+      essential_rules: true
 
 chat:
   auto_reply: true

@@ -17,8 +17,9 @@ import lombok.RequiredArgsConstructor;
 
 import queuing.core.global.response.ResponseBody;
 import queuing.core.room.application.model.CreateRoomCommand;
-import queuing.core.room.application.model.GetListRoomCommand;
+import queuing.core.room.application.model.GetListRoomQuery;
 import queuing.core.room.application.model.GetListRoomResult;
+import queuing.core.room.application.model.TagMatchType;
 import queuing.core.room.application.usecase.CreateRoomUseCase;
 import queuing.core.room.application.usecase.GetListRoomUseCase;
 import queuing.core.room.presentation.request.CreateRoomRequest;
@@ -41,11 +42,28 @@ public class RoomController {
 
     @GetMapping
     public ResponseEntity<ResponseBody<ListRoomResponse>> getList(
-        @RequestParam(required = false) Long lastId,
+        @RequestParam(required = false) List<String> tags,
+        @RequestParam(defaultValue = "any") String matchType,
+        @RequestParam(required = false) Long roomId,
         @RequestParam(defaultValue = "30") int size
     ) {
-        GetListRoomResult getListRoomResult = getListRoomUseCase.getList(new GetListRoomCommand(lastId, size));
-        List<RoomSummaryResponse> items = getListRoomResult.items().stream()
+        GetListRoomResult getListRoomResult = getListRoomUseCase.getList(
+            new GetListRoomQuery(
+                tags,
+                TagMatchType.from(matchType),
+                roomId,
+                size
+            )
+        );
+
+        List<RoomSummaryResponse> items = mapToSummaryResponses(getListRoomResult);
+
+        return ResponseEntity.ok()
+            .body(ResponseBody.success(new ListRoomResponse(items, getListRoomResult.hasNext())));
+    }
+
+    private List<RoomSummaryResponse> mapToSummaryResponses(GetListRoomResult getListRoomResult) {
+        return getListRoomResult.items().stream()
             .map(room -> new RoomSummaryResponse(
                 room.id(),
                 room.slug(),
@@ -56,10 +74,9 @@ public class RoomController {
                     .map(tag -> new MusicTagResponse(
                         tag.slug(),
                         tag.name()
-                    )).toList()
-            )).toList();
-
-        return ResponseEntity.ok()
-            .body(ResponseBody.success(new ListRoomResponse(items, getListRoomResult.hasNext())));
+                    ))
+                    .toList()
+            ))
+            .toList();
     }
 }
