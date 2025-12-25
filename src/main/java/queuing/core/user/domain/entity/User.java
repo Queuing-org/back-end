@@ -42,10 +42,6 @@ public class User {
     @Column(name = "slug", nullable = false, length = 255)
     private String slug;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false, length = 255)
-    private Role role = Role.USER;
-
     @Column(name = "email", nullable = false, length = 255)
     private String email;
 
@@ -59,6 +55,10 @@ public class User {
     @Column(name = "nickname", length = 255)
     private String nickname;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 255)
+    private Role role;
+
     @Column(name = "profile_image_url", length = 255)
     private String profileImageUrl;
 
@@ -70,12 +70,18 @@ public class User {
 
     @Builder
     public User(String slug, String email, OAuthProvider provider, String providerId, String nickname,
-        String profileImageUrl) {
+        Role role, String profileImageUrl) {
         this.slug = slug;
         this.email = email;
         this.provider = provider;
         this.providerId = providerId;
         this.nickname = nickname;
+        this.role = role;
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+        this.role = this.role.equals(Role.GUEST) ? Role.USER : this.role;
     }
 }
