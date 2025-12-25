@@ -7,7 +7,10 @@ server:
     direct-buffers: true
     # 서버 시작 시 필터를 미리 초기화합니다.
     eager-filter-init: true
-
+  error:
+    whitelabel:
+      # 기본 오류 페이지를 비활성화합니다.
+      enabled: false
 spring:
   config:
     # `application-local.yml`이 활성화되려면 `local` 프로필이어야 합니다.
