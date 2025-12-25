@@ -3,6 +3,7 @@ package queuing.core.global.security;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -63,12 +64,12 @@ public class UserPrincipal implements OAuth2User, OidcUser, UserDetails {
 
     @Override
     public String getName() {
-        return this.slug;
+        return Optional.of(this.slug).orElse("anonymousUser");
     }
 
     @Override
     public String getUsername() {
-        return this.slug;
+        return Optional.of(this.slug).orElse("anonymousUser");
     }
 
     @Override
