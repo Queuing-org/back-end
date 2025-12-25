@@ -1,8 +1,9 @@
 package queuing.core.room.application.usecase;
 
-import queuing.core.room.application.model.GetListRoomCommand;
-import queuing.core.room.application.model.GetListRoomResult;
+import queuing.core.room.application.dto.GetListRoomCommand;
+import queuing.core.room.application.dto.RoomSummary;
+import queuing.core.room.application.dto.SliceResult;
 
 public interface GetListRoomUseCase {
-    GetListRoomResult getList(GetListRoomCommand cmd);
+    SliceResult<RoomSummary> getList(GetListRoomCommand cmd);
 }

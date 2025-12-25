@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import queuing.core.room.application.model.MusicTagItem;
+import queuing.core.room.application.dto.MusicTagDto;
 import queuing.core.room.application.usecase.GetListMusicTagUseCase;
 import queuing.core.room.domain.entity.MusicTag;
 import queuing.core.room.domain.repository.MusicTagRepository;
@@ -19,11 +19,11 @@ public class MusicTagReadService implements GetListMusicTagUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MusicTagItem> getList() {
+    public List<MusicTagDto> getList() {
         List<MusicTag> tags = musicTagRepository.findAllByOrderBySlugAsc();
 
         return tags.stream()
-            .map(MusicTagItem::from)
+            .map(MusicTagDto::from)
             .toList();
     }
 }
