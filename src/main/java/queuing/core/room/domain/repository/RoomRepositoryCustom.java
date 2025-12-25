@@ -1,8 +1,8 @@
 package queuing.core.room.domain.repository;
 
-import queuing.core.room.domain.projection.CursorResult;
-import queuing.core.room.domain.projection.RoomWithTagsView;
+import queuing.core.room.domain.query.PageResult;
+import queuing.core.room.domain.query.RoomQueryResult;
 
 public interface RoomRepositoryCustom {
-    CursorResult<RoomWithTagsView> findAllWithTags(Long cursorId, int limit);
+    PageResult<RoomQueryResult> findAllWithTags(Long cursorId, int limit);
 }

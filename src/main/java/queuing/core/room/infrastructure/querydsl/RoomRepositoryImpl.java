@@ -16,9 +16,9 @@ import queuing.core.room.domain.entity.QMusicTag;
 import queuing.core.room.domain.entity.QRoom;
 import queuing.core.room.domain.entity.QRoomMusicTag;
 import queuing.core.room.domain.entity.Room;
-import queuing.core.room.domain.projection.CursorResult;
-import queuing.core.room.domain.projection.MusicTagView;
-import queuing.core.room.domain.projection.RoomWithTagsView;
+import queuing.core.room.domain.query.MusicTagQueryResult;
+import queuing.core.room.domain.query.PageResult;
+import queuing.core.room.domain.query.RoomQueryResult;
 import queuing.core.room.domain.repository.RoomRepositoryCustom;
 
 @Repository
@@ -27,8 +27,8 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
     private final JPAQueryFactory query;
 
     @Override
-    public CursorResult<RoomWithTagsView> findAllWithTags(Long lastId, int size) {
-        BooleanExpression where = (lastId != null && lastId != 0L) ? QRoom.room.id.loe(lastId) : null;
+    public PageResult<RoomQueryResult> findAllWithTags(Long lastId, int size) {
+        BooleanExpression where = (lastId != null && lastId != 0L) ? QRoom.room.id.lt(lastId) : null;
 
         List<Room> rooms = query.selectFrom(QRoom.room)
             .where(where)
@@ -37,12 +37,12 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
             .fetch();
 
         if (rooms.isEmpty()) {
-            return new CursorResult<>(List.of(), null);
+            return PageResult.of(List.of(), null);
         }
 
         boolean hasNext = rooms.size() > size;
         List<Room> bounded = hasNext ? rooms.subList(0, size) : rooms;
-        Long nextId = hasNext ? rooms.get(size).getId() : null;
+        Long nextCursor = hasNext ? rooms.get(size).getId() : null;
 
         List<Long> roomIds = bounded.stream().map(Room::getId).toList();
 
@@ -58,11 +58,11 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
             .orderBy(QMusicTag.musicTag.name.asc())
             .fetch();
 
-        Map<Long, List<MusicTagView>> tagMap = tuples.stream()
+        Map<Long, List<MusicTagQueryResult>> tagMap = tuples.stream()
             .collect(Collectors.groupingBy(
                 t -> t.get(0, Long.class),
                 Collectors.mapping(
-                    t -> new MusicTagView(
+                    t -> new MusicTagQueryResult(
                         t.get(1, String.class),
                         t.get(2, String.class)
                     ),
@@ -70,8 +70,8 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
                 )
             ));
 
-        List<RoomWithTagsView> items = bounded.stream()
-            .map(room -> new RoomWithTagsView(
+        List<RoomQueryResult> items = bounded.stream()
+            .map(room -> new RoomQueryResult(
                 room.getId(),
                 room.getSlug(),
                 room.getTitle(),
@@ -81,6 +81,6 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
             ))
             .toList();
 
-        return new CursorResult<>(items, nextId);
+        return PageResult.of(items, nextCursor);
     }
 }
