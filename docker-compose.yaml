@@ -1,5 +1,5 @@
 services:
-  mariadb:
+  queuing-mariadb:
     image: mariadb:lts
     ports:
       - "33063:3306"
@@ -18,10 +18,10 @@ services:
     volumes:
       - ./container/mariadb/conf.d/server.conf:/etc/mysql/conf.d/server.conf:ro
       - ./container/mariadb/conf.d/client.conf:/etc/mysql/conf.d/client.conf:ro
-      - mariadb_data:/var/lib/mysql
+      - queuing-mariadb_data:/var/lib/mysql
       - ./container/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
-  redis:
+  queuing-redis:
     image: redis:8-alpine
     container_name: redis
     ports:
@@ -33,8 +33,8 @@ services:
       - "mode=standalone"
     volumes:
       - ./container/redis/conf.d/redis.conf:/usr/local/etc/redis/redis.conf:ro
-      - redis_data:/data
+      - queuing-redis_data:/data
 
 volumes:
-  mariadb_data:
-  redis_data:
+  queuing-mariadb_data:
+  queuing-redis_data:

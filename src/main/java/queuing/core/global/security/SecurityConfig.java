@@ -16,16 +16,22 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 
 import lombok.RequiredArgsConstructor;
 
+import tools.jackson.databind.ObjectMapper;
+
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+    private final ObjectMapper objectMapper;
+
     private final SessionProperties sessionProperties;
 
     private final OidcUserService oidcUserService;
     private final UserDetailsService userDetailsService;
     private final PersistentTokenRepository persistentTokenRepository;
+
+    private final ProfileCompletedAuthorizationManager profileCompletedAuthorizationManager;
 
     @Bean
     public SecurityFilterChain authSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -34,11 +40,17 @@ public class SecurityConfig {
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
 
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(new DefaultAuthenticationEntryPoint(objectMapper))
+                .accessDeniedHandler(new DefaultAccessDeniedHandler(objectMapper))
+            )
+
             .oauth2Login(oauth -> oauth
-                .loginPage("/login")
+                .authorizationEndpoint(a -> a.baseUri("/api/auth/login"))
+                .redirectionEndpoint(r -> r.baseUri("/api/auth/callback/*"))
                 .userInfoEndpoint(u -> u.oidcUserService(oidcUserService))
-                .successHandler((req, res, auth) -> res.sendRedirect("/"))
-                .failureHandler((req, res, ex) -> res.sendRedirect("/login?error=" + ex.getMessage()))
+                .successHandler(new CustomOidcSuccessHandler())
+                .failureHandler(new CustomOidcFailureHandler())
             )
 
             .rememberMe(remember -> remember
@@ -52,9 +64,25 @@ public class SecurityConfig {
                 .alwaysRemember(sessionProperties.rememberMeCookie().alwaysRememberMe())
             )
 
+            .logout(logout -> logout
+                .logoutUrl("/api/auth/logout")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .deleteCookies("JSESSIONID",
+                    sessionProperties.sessionCookie().name(),
+                    sessionProperties.rememberMeCookie().name()
+                )
+                .logoutSuccessHandler(new CustomLogoutSuccessHandler(objectMapper))
+            )
+
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS)
                 .permitAll()
+
+                .requestMatchers("/api/v1/user-profiles/me/onboarding")
+                .authenticated()
+
+                .requestMatchers("/api/**").access(profileCompletedAuthorizationManager)
 
                 .anyRequest()
                 .permitAll()

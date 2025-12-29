@@ -80,8 +80,12 @@ public class User {
         this.profileImageUrl = profileImageUrl;
     }
 
+    public boolean isOnboardingCompleted() {
+        boolean isCompleted = nickname != null && !nickname.isBlank();
+        return isCompleted;
+    }
+
     public void updateNickname(String nickname) {
         this.nickname = nickname;
-        this.role = this.role.equals(Role.GUEST) ? Role.USER : this.role;
     }
 }

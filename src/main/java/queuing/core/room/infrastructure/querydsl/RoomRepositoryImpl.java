@@ -17,7 +17,7 @@ import queuing.core.room.domain.entity.QRoom;
 import queuing.core.room.domain.entity.QRoomMusicTag;
 import queuing.core.room.domain.entity.Room;
 import queuing.core.room.domain.query.MusicTagQueryResult;
-import queuing.core.room.domain.query.PageResult;
+import queuing.core.global.dto.SliceResult;
 import queuing.core.room.domain.query.RoomQueryResult;
 import queuing.core.room.domain.repository.RoomRepositoryCustom;
 
@@ -27,7 +27,7 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
     private final JPAQueryFactory query;
 
     @Override
-    public PageResult<RoomQueryResult> findAllWithTags(Long lastId, int size) {
+    public SliceResult<RoomQueryResult> findAllWithTags(Long lastId, int size) {
         BooleanExpression where = (lastId != null && lastId != 0L) ? QRoom.room.id.lt(lastId) : null;
 
         List<Room> rooms = query.selectFrom(QRoom.room)
@@ -36,15 +36,13 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
             .limit(size + 1L)
             .fetch();
 
-        if (rooms.isEmpty()) {
-            return PageResult.of(List.of(), null);
+        boolean hasNext = false;
+        if (rooms.size() > size) {
+            rooms.remove(size);
+            hasNext = true;
         }
 
-        boolean hasNext = rooms.size() > size;
-        List<Room> bounded = hasNext ? rooms.subList(0, size) : rooms;
-        Long nextCursor = hasNext ? rooms.get(size).getId() : null;
-
-        List<Long> roomIds = bounded.stream().map(Room::getId).toList();
+        List<Long> roomIds = rooms.stream().map(Room::getId).toList();
 
         List<Tuple> tuples = query
             .select(
@@ -70,7 +68,7 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
                 )
             ));
 
-        List<RoomQueryResult> items = bounded.stream()
+        List<RoomQueryResult> items = rooms.stream()
             .map(room -> new RoomQueryResult(
                 room.getId(),
                 room.getSlug(),
@@ -81,6 +79,6 @@ public class RoomRepositoryImpl implements RoomRepositoryCustom {
             ))
             .toList();
 
-        return PageResult.of(items, nextCursor);
+        return SliceResult.of(items, hasNext);
     }
 }

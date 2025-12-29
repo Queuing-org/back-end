@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+import queuing.core.global.dto.SliceResult;
 import queuing.core.global.response.ResponseBody;
 import queuing.core.global.security.UserPrincipal;
 import queuing.core.room.application.dto.CreateRoomCommand;
 import queuing.core.room.application.dto.GetListRoomCommand;
 import queuing.core.room.application.dto.RoomSummary;
-import queuing.core.room.application.dto.SliceResult;
 import queuing.core.room.application.usecase.CreateRoomUseCase;
 import queuing.core.room.application.usecase.GetListRoomUseCase;
 import queuing.core.room.presentation.request.CreateRoomRequest;
@@ -31,7 +31,7 @@ import queuing.core.room.presentation.response.MusicTagResponse;
 import queuing.core.room.presentation.response.RoomSummaryResponse;
 
 @RestController
-@RequestMapping("/rooms")
+@RequestMapping("/api/v1/rooms")
 @RequiredArgsConstructor
 public class RoomController {
     private final CreateRoomUseCase createRoomUseCase;
@@ -39,7 +39,7 @@ public class RoomController {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping
-    public ResponseEntity<String> create(
+    public ResponseEntity<ResponseBody<Boolean>> create(
         @AuthenticationPrincipal UserPrincipal principal,
         @RequestBody @Valid CreateRoomRequest request
     ) {
@@ -51,7 +51,8 @@ public class RoomController {
                 request.tags()
             )
         );
-        return ResponseEntity.created(URI.create(slug)).build();
+        return ResponseEntity.created(URI.create(slug))
+            .body(ResponseBody.success(true));
     }
 
     @GetMapping

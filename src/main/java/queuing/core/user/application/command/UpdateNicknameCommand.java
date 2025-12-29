@@ -1,4 +1,4 @@
-package queuing.core.user.application;
+package queuing.core.user.application.command;
 
 public record UpdateNicknameCommand(
     String userSlug,

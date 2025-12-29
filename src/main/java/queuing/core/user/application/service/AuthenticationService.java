@@ -1,7 +1,8 @@
-package queuing.core.user.application;
+package queuing.core.user.application.service;
 
 import java.util.UUID;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,13 +10,16 @@ import lombok.RequiredArgsConstructor;
 
 import queuing.core.global.exception.BusinessException;
 import queuing.core.global.exception.ErrorCode;
+import queuing.core.user.application.command.CheckOnboardingCompletedQuery;
+import queuing.core.user.application.command.SignUpCommand;
+import queuing.core.user.application.usecase.SignUpUseCase;
 import queuing.core.user.domain.entity.Role;
 import queuing.core.user.domain.entity.User;
 import queuing.core.user.domain.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
-public class AuthenticationService {
+public class AuthenticationService implements SignUpUseCase {
     private final UserRepository userRepository;
 
     @Transactional
@@ -33,9 +37,9 @@ public class AuthenticationService {
                     .provider(cmd.oauthProvider())
                     .providerId(cmd.oauthProviderId())
                     .email(cmd.email())
-                    .nickname(cmd.nickname())
+                    .nickname(null)
                     .profileImageUrl(cmd.profileImageUrl())
-                    .role(Role.GUEST)
+                    .role(Role.USER)
                     .build();
 
                 return userRepository.save(created);
@@ -44,17 +48,12 @@ public class AuthenticationService {
         return user;
     }
 
-    @Transactional
-    public User updateNickname(UpdateNicknameCommand cmd) {
-        User user = userRepository.findBySlug(cmd.userSlug())
+    @Override
+    @Cacheable(cacheNames = "profileCompleted", key = "#slug")
+    public boolean isOnboardingCompleted(CheckOnboardingCompletedQuery query) {
+        User user = userRepository.findBySlug(query.userSlug())
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        if (!cmd.nickname().equals(user.getNickname()) && userRepository.existsByNickname(cmd.nickname())) {
-            throw new BusinessException(ErrorCode.USER_NICKNAME_DUPLICATED);
-        }
-
-        user.updateNickname(cmd.nickname());
-
-        return user;
+        return user.isOnboardingCompleted();
     }
 }

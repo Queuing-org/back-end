@@ -1,8 +1,8 @@
 package queuing.core.room.domain.repository;
 
-import queuing.core.room.domain.query.PageResult;
+import queuing.core.global.dto.SliceResult;
 import queuing.core.room.domain.query.RoomQueryResult;
 
 public interface RoomRepositoryCustom {
-    PageResult<RoomQueryResult> findAllWithTags(Long cursorId, int limit);
+    SliceResult<RoomQueryResult> findAllWithTags(Long lastId, int size);
 }

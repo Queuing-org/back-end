@@ -16,7 +16,7 @@ import queuing.core.room.presentation.response.MusicTagResponse;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/tags")
+@RequestMapping("/api/v1/tags")
 public class MusicTagController {
     private final GetListMusicTagUseCase getListMusicTagUseCase;
 

@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
-import queuing.core.user.application.AuthenticationService;
-import queuing.core.user.application.SignUpCommand;
+import queuing.core.user.application.command.SignUpCommand;
+import queuing.core.user.application.service.AuthenticationService;
 import queuing.core.user.domain.entity.OAuthProvider;
 import queuing.core.user.domain.entity.User;
 
