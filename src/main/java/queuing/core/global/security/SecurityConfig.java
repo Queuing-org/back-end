@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 import lombok.RequiredArgsConstructor;
 
@@ -85,6 +86,9 @@ public class SecurityConfig {
 
             .logout(logout -> logout
                 .logoutUrl("/api/auth/logout")
+                .logoutRequestMatcher(
+                    PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/auth/logout")
+                )
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
                 .deleteCookies("JSESSIONID",
