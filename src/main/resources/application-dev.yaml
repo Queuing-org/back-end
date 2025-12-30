@@ -8,6 +8,7 @@ spring:
       - classpath:/properties/core/oauth2.yaml
       - classpath:/properties/core/redirect.yaml
       - classpath:/properties/core/session.yaml
+      - classpath:/properties/core/cors.yaml
   # ---- Jackson 구성
   jackson:
     time-zone: Asia/Seoul
