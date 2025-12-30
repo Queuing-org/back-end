@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomOidcSuccessHandler implements AuthenticationSuccessHandler {
     @Value("${core.oauth2.success-redirect-uri}")
-    private String redirectUrl = "http://localhost:8080/";
+    private String redirectUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
