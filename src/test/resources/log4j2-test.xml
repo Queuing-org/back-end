@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <!-- 공통 변수 -->
+    <Properties>
+        <!-- 날짜 포맷  : yyyy-MM-dd HH:mm:ss.SSS -->
+        <Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd HH:mm:ss.SSS</Property>
+
+        <!-- 로그 레벨  : 5칸 고정 오른쪽 정렬 -->
+        <Property name="LOG_LEVEL_PATTERN">%5p</Property>
+
+        <!-- 스레드명   : 괄호에 감싸진 15자  -->
+        <Property name="LOG_THREAD_PATTERN">[%15.15t]</Property>
+
+        <!-- 로거명    : 40자 왼쪽 정렬 -->
+        <Property name="LOG_LOGGER_PATTERN">%-40.40logger{39}</Property>
+
+        <!-- 구분자 -->
+        <Property name="LOG_SEP_MAIN"> --- </Property>
+        <Property name="LOG_SEP_COLON"> : </Property>
+
+        <!-- 예외 출력 -->
+        <Property name="LOG_EXCEPTION_WORD">%throwable</Property>
+
+        <!-- 콘솔 로그 패턴 -->
+        <Property name="CONSOLE_LOG_PATTERN">
+            %style{%d{${LOG_DATEFORMAT_PATTERN}}}{dim} %highlight{${LOG_LEVEL_PATTERN}}{FATAL=bg_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=blue, TRACE=cyan} %style{${LOG_SEP_MAIN}}{dim} %style{${LOG_THREAD_PATTERN}}{dim} %style{${LOG_LOGGER_PATTERN}}{cyan} %style{${LOG_SEP_COLON}}{dim} %m%n${LOG_EXCEPTION_WORD}
+        </Property>
+    </Properties>
+
+    <!-- 로깅 쓰기자 -->
+    <Appenders>
+        <!-- 콘솔       : 하이라이팅하여 콘솔에 표시 -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="${CONSOLE_LOG_PATTERN}"
+                    disableAnsi="false"
+                    noConsoleNoAnsi="false"/>
+        </Console>
+    </Appenders>
+
+    <!-- 로깅 이벤트 수신자 -->
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+        <Logger name="org.springframework" level="warn"/>
+        <Logger name="queuing.core" level="debug"/>
+        <Logger name="org.hibernate.SQL" level="debug"/>
+        <Logger name="org.hibernate.orm.jdbc.bind" level="trace"/>
+        <Logger name="org.hibernate.orm.jdbc.extract" level="trace"/>
+        <Logger name="org.hibernate.type.descriptor.sql" level="trace"/>
+    </Loggers>
+</Configuration>

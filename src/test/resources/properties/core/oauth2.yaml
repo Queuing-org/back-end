@@ -1,7 +1,9 @@
 core:
   oauth2:
+    success-redirect-uri: 'http://localhost:8080/'
+    failure-redirect-uri: 'http://localhost:8080/?error=true'
     client:
       registration:
         google:
-          client-id: test-client-id
-          client-secret: test-client-secret
+          client-id: 'test-client-id'
+          client-secret: 'test-client-secret'
