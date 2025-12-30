@@ -6,6 +6,7 @@ spring:
     import:
       - classpath:/properties/core/datasource.yaml
       - classpath:/properties/core/oauth2.yaml
+      - classpath:/properties/core/redirect.yaml
       - classpath:/properties/core/session.yaml
   # ---- Jackson 구성
   jackson:

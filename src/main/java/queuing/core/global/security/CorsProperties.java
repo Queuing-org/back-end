@@ -1,0 +1,16 @@
+package queuing.core.global.security;
+
+import java.util.List;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties(prefix = "core.cors")
+public record CorsProperties (
+    List<String> allowedOrigins,
+    List<String> allowedMethods,
+    List<String> allowedHeaders,
+    List<String> exposedHeaders,
+    boolean allowedCredentials,
+    long maxAge
+) {
+}

@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
@@ -25,12 +27,13 @@ import tools.jackson.databind.ObjectMapper;
 public class SecurityConfig {
     private final ObjectMapper objectMapper;
 
-    private final OidcProperties oidcProperties;
+    private final RedirectProperties redirectProperties;
     private final SessionProperties sessionProperties;
 
     private final OidcUserService oidcUserService;
     private final UserDetailsService userDetailsService;
     private final PersistentTokenRepository persistentTokenRepository;
+    private final ClientRegistrationRepository clientRegistrationRepository;
 
     private final ProfileCompletedAuthorizationManager profileCompletedAuthorizationManager;
 
@@ -46,12 +49,27 @@ public class SecurityConfig {
                 .accessDeniedHandler(new DefaultAccessDeniedHandler(objectMapper))
             )
 
+            .addFilterBefore(
+                new ContinueValidationFilter(redirectProperties),
+                OAuth2AuthorizationRequestRedirectFilter.class
+            )
+
             .oauth2Login(oauth -> oauth
-                .authorizationEndpoint(a -> a.baseUri("/api/auth/login"))
-                .redirectionEndpoint(r -> r.baseUri("/api/auth/callback/*"))
+                .authorizationEndpoint(a -> a
+                    .baseUri("/api/auth/login")
+                    .authorizationRequestResolver(
+                        new ContinueSavingAuthorizationRequestResolver(
+                            redirectProperties,
+                            clientRegistrationRepository
+                        )
+                    )
+                )
+                .redirectionEndpoint(r -> r
+                    .baseUri("/api/auth/callback/*")
+                )
                 .userInfoEndpoint(u -> u.oidcUserService(oidcUserService))
-                .successHandler(new CustomOidcSuccessHandler(oidcProperties))
-                .failureHandler(new CustomOidcFailureHandler(oidcProperties))
+                .successHandler(new CustomOidcSuccessHandler(redirectProperties))
+                .failureHandler(new CustomOidcFailureHandler(redirectProperties))
             )
 
             .rememberMe(remember -> remember
@@ -73,11 +91,14 @@ public class SecurityConfig {
                     sessionProperties.sessionCookie().name(),
                     sessionProperties.rememberMeCookie().name()
                 )
-                .logoutSuccessHandler(new CustomLogoutSuccessHandler(objectMapper))
+                .logoutSuccessHandler(new CustomLogoutSuccessHandler(redirectProperties))
             )
 
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS)
+                .permitAll()
+
+                .requestMatchers("/api/auth/**")
                 .permitAll()
 
                 .requestMatchers("/api/v1/user-profiles/me/onboarding")
