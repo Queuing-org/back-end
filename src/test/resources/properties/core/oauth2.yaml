@@ -1,3 +1,7 @@
+spring:
+  config:
+    activate:
+      on-profile: test
 core:
   oauth2:
     success-redirect-uri: 'http://localhost:8080/'

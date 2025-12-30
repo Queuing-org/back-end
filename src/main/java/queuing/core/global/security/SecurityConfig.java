@@ -25,6 +25,7 @@ import tools.jackson.databind.ObjectMapper;
 public class SecurityConfig {
     private final ObjectMapper objectMapper;
 
+    private final OidcProperties oidcProperties;
     private final SessionProperties sessionProperties;
 
     private final OidcUserService oidcUserService;
@@ -49,8 +50,8 @@ public class SecurityConfig {
                 .authorizationEndpoint(a -> a.baseUri("/api/auth/login"))
                 .redirectionEndpoint(r -> r.baseUri("/api/auth/callback/*"))
                 .userInfoEndpoint(u -> u.oidcUserService(oidcUserService))
-                .successHandler(new CustomOidcSuccessHandler())
-                .failureHandler(new CustomOidcFailureHandler())
+                .successHandler(new CustomOidcSuccessHandler(oidcProperties))
+                .failureHandler(new CustomOidcFailureHandler(oidcProperties))
             )
 
             .rememberMe(remember -> remember
