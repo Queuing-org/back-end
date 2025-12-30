@@ -26,9 +26,6 @@ spring:
     open-in-view: false
     show-sql: true
   ## ---
-  #  flyway:
-  #    enabled: true
-  #    locations: classpath:db/migration
   data:
     web:
       pageable:
@@ -49,7 +46,7 @@ spring:
       client:
         registration:
           google:
-            redirect-uri: "{baseUrl}/api/auth/callback/{registrationId}"
+            redirect-uri: "${core.oauth2.client.registration.google.redirect-base-uri}/api/auth/callback/{registrationId}"
             client-id: ${core.oauth2.client.registration.google.client-id}
             client-secret: ${core.oauth2.client.registration.google.client-secret}
             scope: openid, profile, email
