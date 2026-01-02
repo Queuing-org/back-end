@@ -41,11 +41,11 @@ public class DefaultAccessDeniedHandler implements AccessDeniedHandler {
 
     private ErrorCode resolveErrorCode(AccessDeniedException accessDeniedException) {
         if (accessDeniedException instanceof MissingCsrfTokenException) {
-            return ErrorCode.COMMON_TOKEN_INVALID;
+            return ErrorCode.COMMON_CSRF_TOKEN_INVALID;
         }
 
         if (accessDeniedException instanceof InvalidCsrfTokenException) {
-            return ErrorCode.COMMON_TOKEN_INVALID;
+            return ErrorCode.COMMON_CSRF_TOKEN_INVALID;
         }
 
         if (accessDeniedException instanceof UserOnboardingRequiredException) {
