@@ -16,8 +16,8 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 
 import queuing.core.global.security.Constants;
 import queuing.core.global.security.authorization.OnboardingRequiredAuthorizationManager;
-import queuing.core.global.security.filter.CsrfTokenIssueFilter;
+import queuing.core.global.security.csrf.CsrfTokenIssueFilter;
 import queuing.core.global.security.filter.LogoutMethodNotAllowedFilter;
 import queuing.core.global.security.handler.CustomLogoutSuccessHandler;
 import queuing.core.global.security.handler.DefaultAccessDeniedHandler;
@@ -51,6 +51,8 @@ public class SecurityConfig {
     private final RedirectProperties redirectProperties;
     private final SessionProperties sessionProperties;
 
+    private final CsrfTokenRepository csrfTokenRepository;
+
     private final OidcUserService oidcUserService;
     private final UserDetailsService userDetailsService;
     private final PersistentTokenRepository persistentTokenRepository;
@@ -65,7 +67,7 @@ public class SecurityConfig {
             .formLogin(AbstractHttpConfigurer::disable)
 
             .csrf(csrf -> csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .csrfTokenRepository(csrfTokenRepository)
                 .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                 .ignoringRequestMatchers(Constants.Paths.OIDC_LOGIN_PATTERN, Constants.Paths.OIDC_CALLBACK_BASE)
             )
