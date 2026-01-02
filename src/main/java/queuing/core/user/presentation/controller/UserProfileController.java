@@ -1,6 +1,8 @@
 package queuing.core.user.presentation.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -52,7 +54,9 @@ public class UserProfileController {
     @GetMapping("/check-nickname")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResponseBody<Boolean>> checkNickname(
-        @RequestParam String nickname
+        @NotBlank(message = "닉네임은 빈 값일 수 없어요.")
+        @Size(min = 2, max = 20, message = "닉네임은 2 ~ 20자 사이여야 해요.")
+        @Valid @RequestParam String nickname
     ) {
         return ResponseEntity.ok(ResponseBody.success(getUserProfileUseCase.isNickname(nickname)));
     }

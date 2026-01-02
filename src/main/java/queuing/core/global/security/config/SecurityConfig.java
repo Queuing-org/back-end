@@ -134,7 +134,7 @@ public class SecurityConfig {
                 .requestMatchers(Constants.Paths.PERMIT_ALL)
                 .permitAll()
 
-                .requestMatchers(Constants.Paths.API_USER_PROFILE_ONBOARDING)
+                .requestMatchers(Constants.Paths.AUTHENTICATED_BEFORE_COMPLETED_ONBOARDING)
                 .authenticated()
 
                 .requestMatchers(Constants.Paths.API_ALL)
