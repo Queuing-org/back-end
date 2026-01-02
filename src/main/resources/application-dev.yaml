@@ -6,6 +6,7 @@ spring:
     import:
       - classpath:/properties/core/infra-data.yaml
       - classpath:/properties/core/security-cors.yaml
+      - classpath:/properties/core/security-xsrf.yaml
       - classpath:/properties/core/security-oauth2.yaml
       - classpath:/properties/core/security-redirect.yaml
       - classpath:/properties/core/security-session.yaml

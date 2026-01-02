@@ -1,4 +1,4 @@
-package queuing.core.global.security.filter;
+package queuing.core.global.security.csrf;
 
 import java.io.IOException;
 

@@ -3,8 +3,9 @@ spring:
     active: test
   config:
     import:
-      - classpath:/properties/core/oauth2.yaml
-      - classpath:/properties/core/session.yaml
+      - classpath:/properties/core/security-xsrf.yaml
+      - classpath:/properties/core/security-oauth2.yaml
+      - classpath:/properties/core/security-session.yaml
 
   jackson:
     time-zone: 'Asia/Seoul'
