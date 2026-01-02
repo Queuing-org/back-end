@@ -22,7 +22,7 @@ import queuing.core.friend.presentation.response.FriendResponse;
 import queuing.core.friend.presentation.response.ListFriendResponse;
 import queuing.core.global.dto.SliceResult;
 import queuing.core.global.response.ResponseBody;
-import queuing.core.global.security.UserPrincipal;
+import queuing.core.global.security.authorization.UserPrincipal;
 
 @RestController
 @RequestMapping("/api/v1/friends")
@@ -32,8 +32,8 @@ public class FriendController {
     private final DeleteFriendUseCase deleteFriendUseCase;
     private final GetFriendListUseCase getFriendListUseCase;
 
-    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{targetSlug}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResponseBody<Boolean>> deleteFriend(
         @AuthenticationPrincipal UserPrincipal principal,
         @PathVariable String targetSlug
@@ -42,8 +42,8 @@ public class FriendController {
         return ResponseEntity.ok(ResponseBody.success(true));
     }
 
-    @PreAuthorize("isAuthenticated()")
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResponseBody<ListFriendResponse>> getFriends(
         @AuthenticationPrincipal UserPrincipal principal,
         @RequestParam(required = false) Long lastId,

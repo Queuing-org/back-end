@@ -1,6 +1,7 @@
 package queuing.core.friend.presentation.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,7 +17,7 @@ import queuing.core.friend.application.usecase.AcceptFriendRequestUseCase;
 import queuing.core.friend.application.usecase.SendFriendRequestUseCase;
 import queuing.core.friend.presentation.request.SendFriendRequest;
 import queuing.core.global.response.ResponseBody;
-import queuing.core.global.security.UserPrincipal;
+import queuing.core.global.security.authorization.UserPrincipal;
 
 @RestController
 @RequestMapping("/api/v1/friend-requests")
@@ -27,6 +28,7 @@ public class FriendRequestController {
     private final AcceptFriendRequestUseCase acceptFriendRequestUseCase;
 
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResponseBody<Boolean>> sendRequest(
         @AuthenticationPrincipal UserPrincipal principal,
         @Validated @RequestBody SendFriendRequest request
@@ -36,6 +38,7 @@ public class FriendRequestController {
     }
 
     @PatchMapping("/{requestId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResponseBody<Boolean>> acceptRequest(
         @AuthenticationPrincipal UserPrincipal principal,
         @PathVariable Long requestId

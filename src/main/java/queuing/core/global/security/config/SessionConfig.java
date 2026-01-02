@@ -1,4 +1,4 @@
-package queuing.core.global.security;
+package queuing.core.global.security.config;
 
 import org.springframework.boot.web.server.servlet.CookieSameSiteSupplier;
 import org.springframework.context.annotation.Bean;
@@ -7,6 +7,8 @@ import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 
 import lombok.RequiredArgsConstructor;
+
+import queuing.core.global.security.properties.SessionProperties;
 
 @Configuration
 @RequiredArgsConstructor

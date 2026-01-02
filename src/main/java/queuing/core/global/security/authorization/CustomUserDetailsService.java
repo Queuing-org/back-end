@@ -1,4 +1,4 @@
-package queuing.core.global.security;
+package queuing.core.global.security.authorization;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

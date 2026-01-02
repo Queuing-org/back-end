@@ -1,4 +1,4 @@
-package queuing.core.global.security;
+package queuing.core.global.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,9 +16,22 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import lombok.RequiredArgsConstructor;
 
+import queuing.core.global.security.Constants;
+import queuing.core.global.security.authorization.OnboardingRequiredAuthorizationManager;
+import queuing.core.global.security.handler.CustomLogoutSuccessHandler;
+import queuing.core.global.security.handler.DefaultAccessDeniedHandler;
+import queuing.core.global.security.handler.DefaultAuthenticationEntryPoint;
+import queuing.core.global.security.oidc.CustomOidcFailureHandler;
+import queuing.core.global.security.oidc.CustomOidcSuccessHandler;
+import queuing.core.global.security.oidc.RedirectUrlOidcAuthorizationRequestRepository;
+import queuing.core.global.security.oidc.RedirectUrlPreservingRequestResolver;
+import queuing.core.global.security.oidc.RedirectUrlValidationFilter;
+import queuing.core.global.security.properties.RedirectProperties;
+import queuing.core.global.security.properties.SessionProperties;
 import tools.jackson.databind.ObjectMapper;
 
 @Configuration
@@ -27,6 +40,7 @@ import tools.jackson.databind.ObjectMapper;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final ObjectMapper objectMapper;
+    private final CorsConfigurationSource corsConfigurationSource;
 
     private final RedirectProperties redirectProperties;
     private final SessionProperties sessionProperties;
@@ -36,7 +50,7 @@ public class SecurityConfig {
     private final PersistentTokenRepository persistentTokenRepository;
     private final ClientRegistrationRepository clientRegistrationRepository;
 
-    private final ProfileCompletedAuthorizationManager profileCompletedAuthorizationManager;
+    private final OnboardingRequiredAuthorizationManager onboardingRequiredAuthorizationManager;
 
     @Bean
     public SecurityFilterChain authSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -45,28 +59,28 @@ public class SecurityConfig {
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
 
+            .cors(cors -> cors.configurationSource(corsConfigurationSource))
+
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint(new DefaultAuthenticationEntryPoint(objectMapper))
                 .accessDeniedHandler(new DefaultAccessDeniedHandler(objectMapper))
             )
 
             .addFilterBefore(
-                new ContinueValidationFilter(redirectProperties),
+                new RedirectUrlValidationFilter(redirectProperties),
                 OAuth2AuthorizationRequestRedirectFilter.class
             )
 
             .oauth2Login(oauth -> oauth
                 .authorizationEndpoint(a -> a
-                    .baseUri("/api/auth/login")
+                    .baseUri(Constants.Paths.OIDC_LOGIN_BASE)
+                    .authorizationRequestRepository(new RedirectUrlOidcAuthorizationRequestRepository())
                     .authorizationRequestResolver(
-                        new ContinueSavingAuthorizationRequestResolver(
-                            redirectProperties,
-                            clientRegistrationRepository
-                        )
+                        new RedirectUrlPreservingRequestResolver(clientRegistrationRepository)
                     )
                 )
                 .redirectionEndpoint(r -> r
-                    .baseUri("/api/auth/callback/*")
+                    .baseUri(Constants.Paths.OIDC_CALLBACK_BASE)
                 )
                 .userInfoEndpoint(u -> u.oidcUserService(oidcUserService))
                 .successHandler(new CustomOidcSuccessHandler(redirectProperties))
@@ -85,9 +99,9 @@ public class SecurityConfig {
             )
 
             .logout(logout -> logout
-                .logoutUrl("/api/auth/logout")
+                .logoutUrl(Constants.Paths.LOGOUT_BASE)
                 .logoutRequestMatcher(
-                    PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/auth/logout")
+                    PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, Constants.Paths.LOGOUT_BASE)
                 )
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
@@ -95,20 +109,21 @@ public class SecurityConfig {
                     sessionProperties.sessionCookie().name(),
                     sessionProperties.rememberMeCookie().name()
                 )
-                .logoutSuccessHandler(new CustomLogoutSuccessHandler(redirectProperties))
+                .logoutSuccessHandler(new CustomLogoutSuccessHandler())
             )
 
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS)
                 .permitAll()
 
-                .requestMatchers("/api/auth/**")
+                .requestMatchers(Constants.Paths.PERMIT_ALL)
                 .permitAll()
 
-                .requestMatchers("/api/v1/user-profiles/me/onboarding")
+                .requestMatchers(Constants.Paths.API_USER_PROFILE_ONBOARDING)
                 .authenticated()
 
-                .requestMatchers("/api/**").access(profileCompletedAuthorizationManager)
+                .requestMatchers(Constants.Paths.API_ALL)
+                .access(onboardingRequiredAuthorizationManager)
 
                 .anyRequest()
                 .permitAll()

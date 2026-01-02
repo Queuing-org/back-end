@@ -1,4 +1,4 @@
-package queuing.core.global.security;
+package queuing.core.global.security.authorization;
 
 import java.util.function.Supplier;
 
@@ -15,12 +15,14 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
 import queuing.core.global.exception.BusinessException;
+import queuing.core.global.security.exception.InvalidPrincipalException;
+import queuing.core.global.security.exception.UserOnboardingRequiredException;
 import queuing.core.user.application.command.CheckOnboardingCompletedQuery;
 import queuing.core.user.application.usecase.SignUpUseCase;
 
 @Component
 @RequiredArgsConstructor
-public class ProfileCompletedAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
+public class OnboardingRequiredAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
     private final AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
 
     private final SignUpUseCase signUpUseCase;
@@ -37,18 +39,22 @@ public class ProfileCompletedAuthorizationManager implements AuthorizationManage
 
         Object principal = auth.getPrincipal();
         if (!(principal instanceof UserPrincipal userPrincipal)) {
-            return new AuthorizationDecision(false);
+            throw new InvalidPrincipalException();
         }
 
-        boolean completed = false;
         try {
-            completed = signUpUseCase.isOnboardingCompleted(
+            boolean completed = signUpUseCase.isOnboardingCompleted(
                 new CheckOnboardingCompletedQuery(userPrincipal.getUsername())
             );
-        } catch (BusinessException e) {
-            throw new InsufficientAuthenticationException(e.getMessage());
-        }
 
-        return new AuthorizationDecision(completed);
+            if (!completed) {
+                throw new UserOnboardingRequiredException();
+            }
+
+            return new AuthorizationDecision(true);
+
+        } catch (BusinessException e) {
+            throw new InsufficientAuthenticationException(e.getMessage(), e);
+        }
     }
 }

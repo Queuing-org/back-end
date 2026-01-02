@@ -1,4 +1,4 @@
-package queuing.core.global.security;
+package queuing.core.global.security.authorization;
 
 import java.util.Collection;
 import java.util.List;

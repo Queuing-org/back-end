@@ -15,11 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 
 import queuing.core.global.response.ResponseBody;
-import queuing.core.global.security.UserPrincipal;
+import queuing.core.global.security.authorization.UserPrincipal;
 import queuing.core.user.application.command.UpdateNicknameCommand;
+import queuing.core.user.application.dto.UserProfileDto;
 import queuing.core.user.application.usecase.GetUserProfileUseCase;
 import queuing.core.user.application.usecase.UpdateUserProfileUseCase;
-import queuing.core.user.domain.entity.User;
+import queuing.core.user.presentation.request.CheckNicknameRequest;
 import queuing.core.user.presentation.request.UpdateUserProfileRequest;
 import queuing.core.user.presentation.response.UserProfileResponse;
 
@@ -35,8 +36,8 @@ public class UserProfileController {
     public ResponseEntity<ResponseBody<UserProfileResponse>> getMyProfile(
         @AuthenticationPrincipal UserPrincipal principal
     ) {
-        User user = getUserProfileUseCase.getUserProfile(principal.getUsername());
-        return ResponseEntity.ok(ResponseBody.success(UserProfileResponse.from(user)));
+        UserProfileDto userProfile = getUserProfileUseCase.getUserProfile(principal.getUsername());
+        return ResponseEntity.ok(ResponseBody.success(UserProfileResponse.from(userProfile)));
     }
 
     @GetMapping("/{slug}")
@@ -44,8 +45,16 @@ public class UserProfileController {
     public ResponseEntity<ResponseBody<UserProfileResponse>> getUserProfile(
         @PathVariable String slug
     ) {
-        User user = getUserProfileUseCase.getUserProfile(slug);
-        return ResponseEntity.ok(ResponseBody.success(UserProfileResponse.from(user)));
+        UserProfileDto userProfile = getUserProfileUseCase.getUserProfile(slug);
+        return ResponseEntity.ok(ResponseBody.success(UserProfileResponse.from(userProfile)));
+    }
+
+    @GetMapping("/check-nickname")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResponseBody<Boolean>> checkNicknameAvailability(
+        @Valid CheckNicknameRequest request
+    ) {
+        return ResponseEntity.ok(ResponseBody.success(getUserProfileUseCase.isNicknameAvailable(request.nickname())));
     }
 
     @PatchMapping("/me/onboarding")

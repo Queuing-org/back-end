@@ -2,7 +2,9 @@ package queuing.core.global.utils;
 
 import java.security.SecureRandom;
 
-public abstract class SlugUtils {
+public final class SlugUtils {
+    private SlugUtils() {}
+
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final int DEFAULT_LENGTH = 8;

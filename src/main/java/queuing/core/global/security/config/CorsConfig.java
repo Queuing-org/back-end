@@ -1,4 +1,4 @@
-package queuing.core.global.security;
+package queuing.core.global.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import queuing.core.global.security.properties.CorsProperties;
 
 @Configuration
 @Profile("!test")

@@ -1,4 +1,4 @@
-package queuing.core.global.security;
+package queuing.core.global.security.oidc;
 
 import java.io.IOException;
 
@@ -10,6 +10,9 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 
 import lombok.RequiredArgsConstructor;
 
+import queuing.core.global.security.Constants;
+import queuing.core.global.security.properties.RedirectProperties;
+
 @RequiredArgsConstructor
 public class CustomOidcFailureHandler implements AuthenticationFailureHandler {
     private final RedirectProperties redirectProperties;
@@ -20,11 +23,10 @@ public class CustomOidcFailureHandler implements AuthenticationFailureHandler {
         HttpServletResponse response,
         AuthenticationException exception
     ) throws IOException {
+        request.removeAttribute(Constants.Cookies.REDIRECT_URL);
 
-        // ✅ 혹시 저장된 continue가 있으면 정리
-        ContinueSavingAuthorizationRequestResolver.popContinueOrNull(request);
+        String location = redirectProperties.baseUrl() + Constants.Frontend.LOGIN_ERROR_PATH;
 
-        String failureRedirectUrl = redirectProperties.baseUri() + "/login?error";
-        response.sendRedirect(failureRedirectUrl);
+        response.sendRedirect(location);
     }
 }

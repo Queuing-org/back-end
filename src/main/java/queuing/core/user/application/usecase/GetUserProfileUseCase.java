@@ -1,7 +1,9 @@
 package queuing.core.user.application.usecase;
 
-import queuing.core.user.domain.entity.User;
+import queuing.core.user.application.dto.UserProfileDto;
 
 public interface GetUserProfileUseCase {
-    User getUserProfile(String slug);
+    UserProfileDto getUserProfile(String slug);
+
+    boolean isNicknameAvailable(String nickname);
 }

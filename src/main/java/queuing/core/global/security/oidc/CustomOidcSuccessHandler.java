@@ -1,4 +1,4 @@
-package queuing.core.global.security;
+package queuing.core.global.security.oidc;
 
 import java.io.IOException;
 
@@ -10,6 +10,9 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 
 import lombok.RequiredArgsConstructor;
 
+import queuing.core.global.security.Constants;
+import queuing.core.global.security.properties.RedirectProperties;
+
 @RequiredArgsConstructor
 public class CustomOidcSuccessHandler implements AuthenticationSuccessHandler {
     private final RedirectProperties redirectProperties;
@@ -20,10 +23,13 @@ public class CustomOidcSuccessHandler implements AuthenticationSuccessHandler {
         HttpServletResponse response,
         Authentication authentication
     ) throws IOException {
+        Object redirectUrlAttribute = request.getAttribute(Constants.Cookies.REDIRECT_URL);
+        request.removeAttribute(Constants.Cookies.REDIRECT_URL);
 
-        String continueRedirectUrl = ContinueSavingAuthorizationRequestResolver.popContinueOrNull(request);
-        String redirectUrl = (continueRedirectUrl != null) ? continueRedirectUrl : redirectProperties.baseUri();
+        String location = (redirectUrlAttribute instanceof String redirectUrl && !redirectUrl.isBlank())
+            ? redirectUrl
+            : redirectProperties.baseUrl();
 
-        response.sendRedirect(redirectUrl);
+        response.sendRedirect(location);
     }
 }

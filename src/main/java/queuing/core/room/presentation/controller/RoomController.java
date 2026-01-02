@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 import queuing.core.global.dto.SliceResult;
 import queuing.core.global.response.ResponseBody;
-import queuing.core.global.security.UserPrincipal;
+import queuing.core.global.security.authorization.UserPrincipal;
 import queuing.core.room.application.dto.CreateRoomCommand;
 import queuing.core.room.application.dto.GetListRoomCommand;
 import queuing.core.room.application.dto.RoomSummary;

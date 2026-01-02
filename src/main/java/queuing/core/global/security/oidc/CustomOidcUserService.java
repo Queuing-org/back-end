@@ -1,4 +1,4 @@
-package queuing.core.global.security;
+package queuing.core.global.security.oidc;
 
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
+import queuing.core.global.security.authorization.UserPrincipal;
 import queuing.core.user.application.command.SignUpCommand;
 import queuing.core.user.application.service.AuthenticationService;
 import queuing.core.user.domain.entity.OAuthProvider;

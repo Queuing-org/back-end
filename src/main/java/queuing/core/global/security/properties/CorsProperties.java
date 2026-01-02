@@ -1,4 +1,4 @@
-package queuing.core.global.security;
+package queuing.core.global.security.properties;
 
 import java.util.List;
 
