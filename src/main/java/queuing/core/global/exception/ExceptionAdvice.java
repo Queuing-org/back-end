@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -48,13 +49,26 @@ public class ExceptionAdvice {
             .body(null);
     }
 
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ResponseBody<Void>> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex) {
+        ErrorCode errorCode = ErrorCode.COMMON_METHOD_NOT_ALLOWED;
+
+        return ResponseEntity
+            .status(errorCode.getStatus())
+            .body(ResponseBody.error(
+                errorCode.getStatusCode(),
+                errorCode.getCode(),
+                errorCode.getMessage()
+            ));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<ResponseBody<Void>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         ErrorCode errorCode = ErrorCode.COMMON_INVALID_INPUT;
 
         return ResponseEntity
             .status(errorCode.getStatus())
-            .body(new FailedResponseBody(
+            .body(ResponseBody.error(
                 errorCode.getStatusCode(),
                 errorCode.getCode(),
                 errorCode.getMessage(),
@@ -68,7 +82,7 @@ public class ExceptionAdvice {
 
         return ResponseEntity
             .status(errorCode.getStatus())
-            .body(new FailedResponseBody(
+            .body(ResponseBody.error(
                 errorCode.getStatusCode(),
                 errorCode.getCode(),
                 errorCode.getMessage()

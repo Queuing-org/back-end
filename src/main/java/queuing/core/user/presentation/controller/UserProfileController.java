@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,6 @@ import queuing.core.user.application.command.UpdateNicknameCommand;
 import queuing.core.user.application.dto.UserProfileDto;
 import queuing.core.user.application.usecase.GetUserProfileUseCase;
 import queuing.core.user.application.usecase.UpdateUserProfileUseCase;
-import queuing.core.user.presentation.request.CheckNicknameRequest;
 import queuing.core.user.presentation.request.UpdateUserProfileRequest;
 import queuing.core.user.presentation.response.UserProfileResponse;
 
@@ -51,10 +51,10 @@ public class UserProfileController {
 
     @GetMapping("/check-nickname")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ResponseBody<Boolean>> checkNicknameAvailability(
-        @Valid CheckNicknameRequest request
+    public ResponseEntity<ResponseBody<Boolean>> checkNickname(
+        @RequestParam String nickname
     ) {
-        return ResponseEntity.ok(ResponseBody.success(getUserProfileUseCase.isNicknameAvailable(request.nickname())));
+        return ResponseEntity.ok(ResponseBody.success(getUserProfileUseCase.isNickname(nickname)));
     }
 
     @PatchMapping("/me/onboarding")

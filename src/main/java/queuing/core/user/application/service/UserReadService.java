@@ -9,7 +9,6 @@ import queuing.core.global.exception.BusinessException;
 import queuing.core.global.exception.ErrorCode;
 import queuing.core.user.application.dto.UserProfileDto;
 import queuing.core.user.application.usecase.GetUserProfileUseCase;
-import queuing.core.user.domain.entity.User;
 import queuing.core.user.domain.repository.UserRepository;
 
 @Service
@@ -26,7 +25,7 @@ public class UserReadService implements GetUserProfileUseCase {
     }
 
     @Override
-    public boolean isNicknameAvailable(String nickname) {
+    public boolean isNickname(String nickname) {
         return !userRepository.existsByNickname(nickname);
     }
 }

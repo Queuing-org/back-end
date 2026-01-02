@@ -11,7 +11,8 @@ public final class Constants {
         public static final String OIDC_LOGIN_BASE = AUTH_BASE + "/login";
         public static final String OIDC_LOGIN_PATTERN = OIDC_LOGIN_BASE + "/**";
         public static final String OIDC_CALLBACK_BASE = AUTH_BASE + "/callback/*";
-        public static final String LOGOUT_BASE = AUTH_BASE + "/logout";
+        public static final String LOGOUT = AUTH_BASE + "/logout";
+        public static final String CSRF_ISSUE = AUTH_BASE + "/csrf";
 
         public static final String API_ALL = "/api/**";
         public static final String API_USER_PROFILE_ONBOARDING = "/api/v1/user-profiles/me/onboarding";

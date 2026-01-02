@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.csrf.InvalidCsrfTokenException;
+import org.springframework.security.web.csrf.MissingCsrfTokenException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,10 +27,7 @@ public class DefaultAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
         AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        ErrorCode errorCode = ErrorCode.USER_INSUFFICIENT_SCOPE;
-        if (accessDeniedException instanceof UserOnboardingRequiredException) {
-            errorCode = ErrorCode.USER_ONBOARDING_REQUIRED;
-        }
+        ErrorCode errorCode = resolveErrorCode(accessDeniedException);
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -40,4 +39,19 @@ public class DefaultAccessDeniedHandler implements AccessDeniedHandler {
         );
     }
 
+    private ErrorCode resolveErrorCode(AccessDeniedException accessDeniedException) {
+        if (accessDeniedException instanceof MissingCsrfTokenException) {
+            return ErrorCode.COMMON_TOKEN_INVALID;
+        }
+
+        if (accessDeniedException instanceof InvalidCsrfTokenException) {
+            return ErrorCode.COMMON_TOKEN_INVALID;
+        }
+
+        if (accessDeniedException instanceof UserOnboardingRequiredException) {
+            return ErrorCode.USER_ONBOARDING_REQUIRED;
+        }
+
+        return ErrorCode.USER_INSUFFICIENT_SCOPE;
+    }
 }

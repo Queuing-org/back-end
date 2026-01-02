@@ -14,7 +14,11 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -22,6 +26,8 @@ import lombok.RequiredArgsConstructor;
 
 import queuing.core.global.security.Constants;
 import queuing.core.global.security.authorization.OnboardingRequiredAuthorizationManager;
+import queuing.core.global.security.filter.CsrfTokenIssueFilter;
+import queuing.core.global.security.filter.LogoutMethodNotAllowedFilter;
 import queuing.core.global.security.handler.CustomLogoutSuccessHandler;
 import queuing.core.global.security.handler.DefaultAccessDeniedHandler;
 import queuing.core.global.security.handler.DefaultAuthenticationEntryPoint;
@@ -55,9 +61,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain authSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
-            .csrf(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
+
+            .csrf(csrf -> csrf
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                .ignoringRequestMatchers(Constants.Paths.OIDC_LOGIN_PATTERN, Constants.Paths.OIDC_CALLBACK_BASE)
+            )
+            .addFilterAfter(new CsrfTokenIssueFilter(), CsrfFilter.class)
 
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
 
@@ -98,15 +110,18 @@ public class SecurityConfig {
                 .alwaysRemember(sessionProperties.rememberMeCookie().alwaysRememberMe())
             )
 
+            .addFilterBefore(new LogoutMethodNotAllowedFilter(objectMapper), LogoutFilter.class)
+
             .logout(logout -> logout
-                .logoutUrl(Constants.Paths.LOGOUT_BASE)
+                .logoutUrl(Constants.Paths.LOGOUT)
                 .logoutRequestMatcher(
-                    PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, Constants.Paths.LOGOUT_BASE)
+                    PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, Constants.Paths.LOGOUT)
                 )
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
                 .deleteCookies("JSESSIONID",
                     sessionProperties.sessionCookie().name(),
+                    "remember-me",
                     sessionProperties.rememberMeCookie().name()
                 )
                 .logoutSuccessHandler(new CustomLogoutSuccessHandler())

@@ -8,6 +8,7 @@ public enum ErrorCode {
     // Common
     COMMON_INTERNAL_SERVER_ERROR(INTERNAL_SERVER_ERROR, null, null),
     COMMON_METHOD_NOT_ALLOWED(METHOD_NOT_ALLOWED, null, null),
+    COMMON_TOKEN_INVALID(FORBIDDEN, null, null),
     COMMON_INVALID_INPUT(BAD_REQUEST, "invalid-input", "입력 값이 잘못되었어요."),
 
     // User
