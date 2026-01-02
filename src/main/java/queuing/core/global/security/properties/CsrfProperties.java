@@ -13,7 +13,6 @@ public record CsrfProperties(
     }
 
     public record Cookie(
-        String headerName,
         String name,
         String domain,
         String path,
