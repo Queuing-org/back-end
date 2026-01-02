@@ -15,12 +15,17 @@ public final class Constants {
         public static final String CSRF_ISSUE = AUTH_BASE + "/csrf";
 
         public static final String API_ALL = "/api/**";
-        public static final String API_USER_PROFILE_ONBOARDING = "/api/v1/user-profiles/me/onboarding";
+        public static final String API_USER_PROFILES_CHECK_NICKNAME = "/api/v1/user-profiles/check-nickname";
+        public static final String API_USER_PROFILES_ME_ONBOARDING = "/api/v1/user-profiles/me/onboarding";
         public static final String APP_APP_INFO = "/api/v1/app/**";
 
         public static final String[] PERMIT_ALL = {
             AUTH_ALL,
             APP_APP_INFO
+        };
+        public static final String[] AUTHENTICATED_BEFORE_COMPLETED_ONBOARDING = {
+            API_USER_PROFILES_ME_ONBOARDING,
+            API_USER_PROFILES_CHECK_NICKNAME
         };
     }
 
