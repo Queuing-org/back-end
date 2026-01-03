@@ -1,0 +1,18 @@
+core:
+  session:
+    session-cookie:
+      name: "QUE_SES"
+      domain: "localhost"
+      max-age: -1
+      http-only: true
+      secure: false
+      same-site: "LAX"
+
+    remember-me-cookie:
+      name: "QUE_AUT"
+      # secrets.yaml
+      key: ""
+      domain: "localhost"
+      max-age: 7776000
+      secure: false
+      always-remember-me: true

@@ -19,12 +19,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
         with:
-          submodules: true
-          # 개인 사용자 토큰의 소유자가 변경되면 이 설정 파일을 다시 커밋하여
-          # GitHub Actions 최초 실행 사용자를 변경해야 합니다.
+          # submodules 제거됨
           token: ${{ secrets.ACTIONS_TOKEN }}
 
-      # 도커 이미지 빌드를 위한 Docker Buildx 내려 받기
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -32,18 +29,13 @@ jobs:
           driver-opts: |
             network=host
 
-      # 도커 이미지 업로드를 위한 GitHub Container Registry 로그인
-      # https://docs.github.com/ko/packages/working-with-a-github-packages-registry/working-with-the-container-registry
       - name: Login to Github Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          # 개인 사용자 토큰의 소유자가 변경되면 이 설정 파일을 다시 커밋하여
-          # GitHub Actions 최초 실행 사용자를 변경해야 합니다.
           password: ${{ secrets.ACTIONS_TOKEN }}
 
-      # 메타 데이터를 추출해 이미지 태그 및 레이블 생성
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -67,32 +59,68 @@ jobs:
   deploy:
     needs: build
     runs-on: [ self-hosted ]
+
     steps:
-      # Docker 이미지 내려 받기를 위한 GHCR 로그인
+      # rootless nerdctl 안정화 (runner 서비스 환경에서 XDG_RUNTIME_DIR 누락 대비)
+      - name: Prepare rootless nerdctl env
+        shell: bash
+        run: |
+          echo "/usr/local/bin" >> "$GITHUB_PATH"
+          echo "XDG_RUNTIME_DIR=/run/user/$(id -u)" >> "$GITHUB_ENV"
+          # 환경에 따라 필요할 수 있음(기본은 불필요한 게 정상)
+          # echo "CONTAINERD_ADDRESS=/run/user/$(id -u)/containerd-rootless/containerd.sock" >> "$GITHUB_ENV"
+
+      # 서버의 private config repo를 갱신 (이미 클론돼 있으면 pull / 없으면 clone)
+      - name: Update private config repo
+        shell: bash
+        env:
+          CONFIG_DIR: ${{ vars.CONFIG_DIR }}              # 예: /home/queuing/config-repo
+          CONFIG_REPO_URL: ${{ secrets.CONFIG_REPO_URL }} # 예: https://github.com/org/private-config.git
+          CONFIG_REPO_PAT: ${{ secrets.CONFIG_REPO_PAT }} # repo read 권한 PAT (또는 deploy key로 대체)
+          CONFIG_REF: ${{ vars.CONFIG_REF }}              # 예: main
+        run: |
+          set -euo pipefail
+          if [ ! -d "$CONFIG_DIR/.git" ]; then
+            rm -rf "$CONFIG_DIR"
+            git clone "https://x-access-token:${CONFIG_REPO_PAT}@${CONFIG_REPO_URL#https://}" "$CONFIG_DIR"
+          fi
+          git -C "$CONFIG_DIR" fetch --prune origin
+          git -C "$CONFIG_DIR" reset --hard "origin/${CONFIG_REF:-main}"
+
+      # GHCR 로그인 (rootless라 sudo 제거)
       - name: Login to GHCR
-        run: echo "${{ secrets.ACTIONS_TOKEN }}" | sudo -n nerdctl login ghcr.io -u "${{ github.actor }}" --password-stdin
+        run: echo "${{ secrets.ACTIONS_TOKEN }}" | nerdctl login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-      # 이미지 내려 받기
       - name: Pull latest image
-        run: sudo -n nerdctl pull ${{ needs.build.outputs.image-tag }}
+        run: nerdctl pull ${{ needs.build.outputs.image-tag }}
 
-      # 실행 중인 컨테이너 정리 및 기존 이미지 삭제
+      # 네트워크 없으면 생성(처음 한번)
+      - name: Ensure network exists
+        shell: bash
+        run: |
+          nerdctl network inspect "${{ vars.NETWORK_NAME }}" >/dev/null 2>&1 \
+            || nerdctl network create "${{ vars.NETWORK_NAME }}"
+
       - name: Clean up old container and image
+        shell: bash
         run: |
-          sudo -n nerdctl rm -f ${{ vars.CONTAINER_NAME }} || true
-          sudo -n nerdctl images "ghcr.io/${{ github.repository }}" \
-          --format "{{.Repository}}:{{.Tag}}" \
-          | grep -v "${{ needs.build.outputs.image-tag }}" \
-          | xargs -r sudo -n nerdctl rmi -f || true
+          nerdctl rm -f "${{ vars.CONTAINER_NAME }}" || true
+          nerdctl images "ghcr.io/${{ github.repository }}" \
+            --format "{{.Repository}}:{{.Tag}}" \
+            | grep -v "${{ needs.build.outputs.image-tag }}" \
+            | xargs -r nerdctl rmi -f || true
 
-      # 새로운 이미지로 새로운 컨테이너 생성하여 실행
-      - name: Run New Container
+      - name: Run New Container (mount /config read-only)
+        shell: bash
+        env:
+          CONFIG_DIR: ${{ vars.CONFIG_DIR }}         # 예: /home/queuing/config-repo
+          CONFIG_PROFILE_DIR: ${{ vars.CONFIG_PROFILE_DIR }} # 예: dev (CONFIG_DIR/dev 를 /config로 마운트)
         run: |
-          sudo -n nerdctl run -d \
-            --name ${{ vars.CONTAINER_NAME }} \
-            --network ${{ vars.NETWORK_NAME }} \
-            -p 127.0.0.1:${{ secrets.DEV_WEB_PORT }}:8080 \
-            --add-host=host.docker.internal:host-gateway \
-            -e USE_PROFILE=dev \
+          nerdctl run -d \
+            --name "${{ vars.CONTAINER_NAME }}" \
+            --network "${{ vars.NETWORK_NAME }}" \
+            -p "127.0.0.1:${{ secrets.DEV_WEB_PORT }}:8080" \
+            -v "${CONFIG_DIR}/${CONFIG_PROFILE_DIR}:/config:ro" \
+            -e SPRING_PROFILES_ACTIVE=dev \
             -e TZ=Asia/Seoul \
             ${{ needs.build.outputs.image-tag }}

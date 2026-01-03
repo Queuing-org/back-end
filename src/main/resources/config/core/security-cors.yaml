@@ -1,0 +1,9 @@
+core:
+  cors:
+    allowed-origins:
+      - "http://localhost:3000"
+    allowed-methods: [ "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS" ]
+    allowed-headers: [ "*" ]
+    exposed-headers: [ ]
+    allow-credentials: true
+    max-age: 3600

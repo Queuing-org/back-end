@@ -1,0 +1,9 @@
+core:
+  oauth2:
+    client:
+      registration:
+        google:
+          redirect-base-uri: ""
+          # secrets.yaml
+          client-id: ""
+          client-secret: ""

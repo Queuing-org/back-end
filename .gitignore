@@ -40,6 +40,8 @@ generated/
 # 환경 변수
 .env
 *.env
+src/main/resources/config/local/
+!**/src/main/resources/config/local/*.example
 # 컨테이너
 container/**/data
 !**/src/main/**/container/

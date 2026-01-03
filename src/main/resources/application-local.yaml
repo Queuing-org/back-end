@@ -4,12 +4,14 @@ spring:
     activate:
       on-profile: local
     import:
-      - classpath:/properties/core/infra-data.yaml
-      - classpath:/properties/core/security-cors.yaml
-      - classpath:/properties/core/security-xsrf.yaml
-      - classpath:/properties/core/security-oauth2.yaml
-      - classpath:/properties/core/security-redirect.yaml
-      - classpath:/properties/core/security-session.yaml
+      - classpath:/config/core/infra-data.yaml
+      - classpath:/config/core/security-cors.yaml
+      - classpath:/config/core/security-xsrf.yaml
+      - classpath:/config/core/security-oauth2.yaml
+      - classpath:/config/core/security-redirect.yaml
+      - classpath:/config/core/security-session.yaml
+      - optional:classpath:/config/local/overrides.yaml
+      - optional:classpath:/config/local/secrets.yaml
   # ---- Jackson 구성
   jackson:
     time-zone: Asia/Seoul
