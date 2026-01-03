@@ -16,11 +16,11 @@ public final class CustomCsrfTokenRepository implements CsrfTokenRepository {
     public CustomCsrfTokenRepository(CsrfProperties csrfProperties) {
         CookieCsrfTokenRepository cookieCsrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
 
-        if (StringUtils.hasText(csrfProperties.cookie().name())) {
-            cookieCsrfTokenRepository.setCookieName(csrfProperties.cookie().name());
-        }
         if (StringUtils.hasText(csrfProperties.header().name())) {
             cookieCsrfTokenRepository.setHeaderName(csrfProperties.header().name());
+        }
+        if (StringUtils.hasText(csrfProperties.cookie().name())) {
+            cookieCsrfTokenRepository.setCookieName(csrfProperties.cookie().name());
         }
         if (StringUtils.hasText(csrfProperties.cookie().path())) {
             cookieCsrfTokenRepository.setCookiePath(csrfProperties.cookie().path());
@@ -30,9 +30,8 @@ public final class CustomCsrfTokenRepository implements CsrfTokenRepository {
             if (StringUtils.hasText(csrfProperties.cookie().domain())) {
                 builder.domain(csrfProperties.cookie().domain());
             }
-            if (StringUtils.hasText(csrfProperties.cookie().sameSite())) {
-                builder.sameSite(csrfProperties.cookie().sameSite());
-            }
+            builder.sameSite(csrfProperties.cookie().sameSite());
+            builder.maxAge(csrfProperties.cookie().maxAge());
             builder.secure(csrfProperties.cookie().secure());
         });
 

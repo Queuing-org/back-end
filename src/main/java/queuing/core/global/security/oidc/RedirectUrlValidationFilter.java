@@ -39,8 +39,9 @@ public class RedirectUrlValidationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String continueParam = request.getParameter(Constants.Cookies.PARAM_CONTINUE);
 
-        if (continueParam == null || !continueParam.isBlank()) {
+        if (continueParam == null || continueParam.isBlank()) {
             filterChain.doFilter(request, response);
+            return;
         }
 
         try {
